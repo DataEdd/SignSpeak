@@ -1,0 +1,21 @@
+{
+  "gloss": "HAPPY",
+  "english": [
+    "happy"
+  ],
+  "category": "emotion",
+  "source": "wlasl",
+  "status": "verified",
+  "quality_score": 4,
+  "verified_by": "auto-import",
+  "verified_date": "2026-02-04",
+  "video": {
+    "file": "video.mp4",
+    "fps": 25,
+    "duration_ms": 2202
+  },
+  "timing": {
+    "sign_start_ms": 0,
+    "sign_end_ms": 2202
+  }
+}
