@@ -2,15 +2,15 @@
 
 **Text-to-sign-language video platform using NLP grammar conversion and motion capture synthesis.**
 
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://dataedd.github.io/SignSpeak)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com/)
 [![React 18](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-SignSpeak translates English text into American Sign Language (ASL) video output. It applies research-backed ASL grammar transformations, maps words to a verified sign database, and composites sign clips into smooth video sequences.
+**[Try the Live Demo →](https://dataedd.github.io/SignSpeak)**
 
-<!-- TODO: Replace with actual demo GIF -->
-<!-- ![SignSpeak Demo](docs/demo.gif) -->
+SignSpeak translates English text into American Sign Language (ASL) video output. It applies research-backed ASL grammar transformations, maps words to a verified sign database, and composites sign clips into smooth video sequences.
 
 ---
 

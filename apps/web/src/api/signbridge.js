@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { mockTranslate } from './mockTranslate'
 
 const API_BASE = '/api'
 
@@ -16,12 +17,15 @@ export async function translateText(text) {
       videoUrl: response.data.video_url,
       glosses: response.data.glosses || [],
       confidence: response.data.confidence,
+      isDemo: false,
     }
   } catch (error) {
     if (error.response) {
       throw new Error(error.response.data.message || 'Translation failed')
     }
-    throw new Error('Network error - please check if the backend is running')
+    // Network error — backend unreachable, fall back to client-side mock
+    const result = mockTranslate(text)
+    return { videoUrl: null, ...result }
   }
 }
 
