@@ -103,12 +103,8 @@ function GlossAnimation({ glosses, confidence }) {
           onClick={replay}
           disabled={isAnimating}
         >
-          Replay
+          Replay Glosses
         </button>
-
-        <div className="demo-banner">
-          Frontend demo — run locally for full video output
-        </div>
       </div>
     </div>
   )
