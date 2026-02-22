@@ -14,6 +14,7 @@ function App() {
   const [error, setError] = useState(null)
   const [glosses, setGlosses] = useState([])
   const [confidence, setConfidence] = useState(null)
+  const [isDemo, setIsDemo] = useState(false)
 
   const handleTranslate = useCallback(async (text) => {
     if (!text.trim()) return
@@ -27,11 +28,13 @@ function App() {
       setVideoUrl(result.videoUrl)
       setGlosses(result.glosses || [])
       setConfidence(result.confidence)
+      setIsDemo(!!result.isDemo)
     } catch (err) {
       setError(err.message || 'Translation failed')
       setVideoUrl(null)
       setGlosses([])
       setConfidence(null)
+      setIsDemo(false)
     } finally {
       setIsTranslating(false)
     }
@@ -117,7 +120,13 @@ function App() {
         </div>
 
         <div className="video-area">
-          <VideoPanel videoUrl={videoUrl} isTranslating={isTranslating} />
+          <VideoPanel
+            videoUrl={videoUrl}
+            isTranslating={isTranslating}
+            isDemo={isDemo}
+            glosses={glosses}
+            confidence={confidence}
+          />
         </div>
       </main>
 

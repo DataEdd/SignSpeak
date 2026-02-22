@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
+import GlossAnimation from './GlossAnimation'
 import './VideoPanel.css'
 
-function VideoPanel({ videoUrl, isTranslating }) {
+function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence }) {
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState(null)
@@ -30,6 +31,11 @@ function VideoPanel({ videoUrl, isTranslating }) {
       videoRef.current.currentTime = 0
       videoRef.current.play()
     }
+  }
+
+  // Demo mode: show GlossAnimation instead of video
+  if (isDemo && !videoUrl) {
+    return <GlossAnimation glosses={glosses} confidence={confidence} />
   }
 
   return (
