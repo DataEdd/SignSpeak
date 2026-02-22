@@ -3,6 +3,7 @@
  * Mirrors the real backend's translation pipeline so the GitHub Pages
  * demo works without a running server.
  */
+import { glossesToSigml } from './sigmlLookup'
 
 const ARTICLES = new Set(['a', 'an', 'the'])
 const BE_VERBS = new Set(['is', 'are', 'was', 'were', 'am', 'be', 'been', 'being'])
@@ -48,7 +49,7 @@ function simplifyVerb(word) {
  *  7. Uppercase all glosses
  *
  * @param {string} text - English sentence
- * @returns {{ glosses: string[], confidence: number, isDemo: true }}
+ * @returns {{ glosses: string[], confidence: number, isDemo: true, sigml: string|null }}
  */
 export function mockTranslate(text) {
   if (!text || !text.trim()) {
@@ -90,5 +91,7 @@ export function mockTranslate(text) {
 
   const confidence = Math.max(0.65, 0.95 - tokens.length * 0.01)
 
-  return { glosses, confidence, isDemo: true }
+  const sigml = glossesToSigml(glosses)
+
+  return { glosses, confidence, isDemo: true, sigml }
 }

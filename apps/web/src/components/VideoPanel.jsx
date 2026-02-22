@@ -1,11 +1,17 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 import GlossAnimation from './GlossAnimation'
+import AvatarPanel from './AvatarPanel'
 import './VideoPanel.css'
 
-function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence }) {
+function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigml }) {
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState(null)
+  const [avatarFailed, setAvatarFailed] = useState(false)
+
+  const handleAvatarLoadFailed = useCallback(() => {
+    setAvatarFailed(true)
+  }, [])
 
   useEffect(() => {
     if (videoUrl && videoRef.current) {
@@ -33,9 +39,19 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence }) {
     }
   }
 
-  // Demo mode: show GlossAnimation instead of video
+  // Demo mode: show Avatar + GlossAnimation
   if (isDemo && !videoUrl) {
-    return <GlossAnimation glosses={glosses} confidence={confidence} />
+    return (
+      <div className="demo-display">
+        {!avatarFailed && (
+          <AvatarPanel
+            sigml={sigml}
+            onLoadFailed={handleAvatarLoadFailed}
+          />
+        )}
+        <GlossAnimation glosses={glosses} confidence={confidence} />
+      </div>
+    )
   }
 
   return (
