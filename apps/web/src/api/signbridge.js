@@ -17,6 +17,7 @@ export async function translateText(text) {
       videoUrl: response.data.video_url,
       glosses: response.data.glosses || [],
       confidence: response.data.confidence,
+      sigml: response.data.sigml || null,
       isDemo: false,
     }
   } catch (error) {
@@ -27,7 +28,7 @@ export async function translateText(text) {
     }
     // Backend unreachable or not our API (e.g. GitHub Pages 404) — fall back to mock
     const result = mockTranslate(text)
-    return { videoUrl: null, ...result }
+    return { videoUrl: null, sigml: result.sigml || null, ...result }
   }
 }
 

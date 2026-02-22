@@ -12,6 +12,7 @@ function App() {
   const [glosses, setGlosses] = useState([])
   const [confidence, setConfidence] = useState(null)
   const [isDemo, setIsDemo] = useState(false)
+  const [sigml, setSigml] = useState(null)
 
   const handleTranslate = useCallback(async (text) => {
     if (!text.trim()) return
@@ -26,12 +27,14 @@ function App() {
       setGlosses(result.glosses || [])
       setConfidence(result.confidence)
       setIsDemo(!!result.isDemo)
+      setSigml(result.sigml || null)
     } catch (err) {
       setError(err.message || 'Translation failed')
       setVideoUrl(null)
       setGlosses([])
       setConfidence(null)
       setIsDemo(false)
+      setSigml(null)
     } finally {
       setIsTranslating(false)
     }
@@ -95,6 +98,7 @@ function App() {
             isDemo={isDemo}
             glosses={glosses}
             confidence={confidence}
+            sigml={sigml}
           />
         </div>
       </main>

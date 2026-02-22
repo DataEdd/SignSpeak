@@ -1,3 +1,10 @@
+/* Demo display: Avatar + GlossAnimation stacked */
+.demo-display {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .video-panel {
   background: var(--bg-card);
   border-radius: 12px;

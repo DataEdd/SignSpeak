@@ -1,0 +1,172 @@
+.avatar-panel {
+  background: var(--bg-card, #1a1a2e);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #2a2a3e);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.avatar-panel.avatar-unavailable {
+  padding: 24px;
+  text-align: center;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-fallback-msg {
+  opacity: 0.7;
+}
+
+.fallback-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.avatar-fallback-msg p {
+  color: var(--text-secondary, #a0a0b0);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.avatar-fallback-msg .fallback-hint {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.avatar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color, #2a2a3e);
+  background: var(--bg-input, #151525);
+}
+
+.avatar-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+}
+
+.avatar-status {
+  display: flex;
+  gap: 8px;
+}
+
+.avatar-panel .status-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.avatar-panel .status-badge.loading {
+  background: rgba(234, 179, 8, 0.2);
+  color: #eab308;
+}
+
+.avatar-panel .status-badge.ready {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.avatar-panel .status-badge.signing {
+  background: rgba(99, 102, 241, 0.2);
+  color: #6366f1;
+  animation: avatarPulse 1.5s infinite;
+}
+
+@keyframes avatarPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.avatar-container {
+  aspect-ratio: 1;
+  background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.cwasa-avatar-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-container .CWASAvatarPanel {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.avatar-container canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.avatar-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-top: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px 16px;
+}
+
+.avatar-error p {
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.avatar-actions {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-color, #2a2a3e);
+  display: flex;
+  gap: 8px;
+}
+
+.avatar-panel .action-btn {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.avatar-panel .stop-btn {
+  background: var(--bg-input, #151525);
+  color: var(--text-secondary, #a0a0b0);
+  border: 1px solid var(--border-color, #2a2a3e);
+}
+
+.avatar-panel .stop-btn:hover:not(:disabled) {
+  background: var(--border-color, #2a2a3e);
+  color: var(--text-primary, #ffffff);
+}
+
+.avatar-panel .stop-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.avatar-info {
+  padding: 8px 16px;
+  border-top: 1px solid var(--border-color, #2a2a3e);
+  text-align: center;
+}
+
+.avatar-info p {
+  color: var(--text-secondary, #a0a0b0);
+  font-size: 11px;
+}
