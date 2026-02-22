@@ -20,10 +20,12 @@ export async function translateText(text) {
       isDemo: false,
     }
   } catch (error) {
-    if (error.response) {
-      throw new Error(error.response.data.message || 'Translation failed')
+    // Only throw if we got a real JSON error from our backend
+    const data = error.response?.data
+    if (error.response && typeof data === 'object' && data?.message) {
+      throw new Error(data.message)
     }
-    // Network error — backend unreachable, fall back to client-side mock
+    // Backend unreachable or not our API (e.g. GitHub Pages 404) — fall back to mock
     const result = mockTranslate(text)
     return { videoUrl: null, ...result }
   }
