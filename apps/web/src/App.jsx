@@ -1,13 +1,10 @@
 import React, { useState, useCallback } from 'react'
-import VideoPlayer from './components/VideoPlayer'
-import Transcript from './components/Transcript'
 import TextInput from './components/TextInput'
 import VideoPanel from './components/VideoPanel'
 import { translateText } from './api/signbridge'
 import './App.css'
 
 function App() {
-  const [mode, setMode] = useState('text')
   const [videoUrl, setVideoUrl] = useState(null)
   const [currentText, setCurrentText] = useState('')
   const [isTranslating, setIsTranslating] = useState(false)
@@ -40,10 +37,6 @@ function App() {
     }
   }, [])
 
-  const handleTranscriptUpdate = useCallback((text) => {
-    handleTranslate(text)
-  }, [handleTranslate])
-
   return (
     <div className="app">
       <header className="app-header">
@@ -54,63 +47,39 @@ function App() {
           </h1>
           <p className="tagline">Text to Sign Language Video Translation</p>
         </div>
-        <div className="mode-toggle">
-          <button
-            className={`mode-btn ${mode === 'demo' ? 'active' : ''}`}
-            onClick={() => setMode('demo')}
-          >
-            Demo Mode
-          </button>
-          <button
-            className={`mode-btn ${mode === 'text' ? 'active' : ''}`}
-            onClick={() => setMode('text')}
-          >
-            Text Mode
-          </button>
-        </div>
       </header>
 
       <main className="app-main">
         <div className="content-area">
-          {mode === 'demo' ? (
-            <div className="demo-section">
-              <VideoPlayer onTranscriptUpdate={handleTranscriptUpdate} />
-              <Transcript
-                currentText={currentText}
-                glosses={glosses}
-              />
-            </div>
-          ) : (
-            <div className="text-section">
-              <TextInput
-                onTranslate={handleTranslate}
-                isTranslating={isTranslating}
-              />
-              {currentText && (
-                <div className="translation-info">
-                  <h3>Input Text:</h3>
-                  <p className="input-text">{currentText}</p>
-                  {glosses.length > 0 && (
-                    <>
-                      <h3>ASL Glosses:</h3>
-                      <div className="gloss-list">
-                        {glosses.map((gloss, index) => (
-                          <span key={index} className="gloss-tag">
-                            {gloss}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  {confidence !== null && (
-                    <p className="confidence">
-                      Confidence: {(confidence * 100).toFixed(0)}%
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          <div className="text-section">
+            <TextInput
+              onTranslate={handleTranslate}
+              isTranslating={isTranslating}
+            />
+            {currentText && (
+              <div className="translation-info">
+                <h3>Input Text:</h3>
+                <p className="input-text">{currentText}</p>
+                {glosses.length > 0 && (
+                  <>
+                    <h3>ASL Glosses:</h3>
+                    <div className="gloss-list">
+                      {glosses.map((gloss, index) => (
+                        <span key={index} className="gloss-tag">
+                          {gloss}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {confidence !== null && (
+                  <p className="confidence">
+                    Confidence: {(confidence * 100).toFixed(0)}%
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
 
           {error && (
             <div className="error-message">
