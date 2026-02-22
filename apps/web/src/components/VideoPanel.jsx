@@ -8,10 +8,22 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState(null)
   const [avatarFailed, setAvatarFailed] = useState(false)
+  const [recordedVideoUrl, setRecordedVideoUrl] = useState(null)
 
   const handleAvatarLoadFailed = useCallback(() => {
     setAvatarFailed(true)
   }, [])
+
+  const handleVideoRecorded = useCallback((url) => {
+    setRecordedVideoUrl(url)
+  }, [])
+
+  // Clear recorded video when new translation starts
+  useEffect(() => {
+    if (isTranslating) {
+      setRecordedVideoUrl(null)
+    }
+  }, [isTranslating])
 
   useEffect(() => {
     if (videoUrl && videoRef.current) {
@@ -39,7 +51,7 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
     }
   }
 
-  // Demo mode: show Avatar + GlossAnimation
+  // Demo mode: show Avatar (which records video) + GlossAnimation
   if (isDemo && !videoUrl) {
     return (
       <div className="demo-display">
@@ -47,12 +59,16 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
           <AvatarPanel
             sigml={sigml}
             onLoadFailed={handleAvatarLoadFailed}
+            onVideoRecorded={handleVideoRecorded}
           />
         )}
         <GlossAnimation glosses={glosses} confidence={confidence} />
       </div>
     )
   }
+
+  // Real backend video or recorded avatar video
+  const activeVideoUrl = videoUrl || recordedVideoUrl
 
   return (
     <div className="video-panel">
@@ -61,12 +77,12 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
         <div className="video-status">
           {isTranslating && <span className="status-badge translating">Translating...</span>}
           {isPlaying && <span className="status-badge playing">Playing</span>}
-          {!isTranslating && !isPlaying && videoUrl && <span className="status-badge ready">Ready</span>}
+          {!isTranslating && !isPlaying && activeVideoUrl && <span className="status-badge ready">Ready</span>}
         </div>
       </div>
 
       <div className="video-container">
-        {videoUrl ? (
+        {activeVideoUrl ? (
           <video
             ref={videoRef}
             className="sign-video"
@@ -76,10 +92,8 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
             onPause={handlePause}
             onEnded={handleEnded}
             onError={handleError}
-          >
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support video playback.
-          </video>
+            src={activeVideoUrl}
+          />
         ) : (
           <div className="video-placeholder">
             <div className="placeholder-icon">&#x1F91F;</div>
@@ -99,14 +113,14 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
         <button
           className="action-btn replay-btn"
           onClick={handleReplay}
-          disabled={!videoUrl || isTranslating}
+          disabled={!activeVideoUrl || isTranslating}
         >
           Replay
         </button>
       </div>
 
       <div className="video-info">
-        <p>Powered by SignSpeak NLP + motion capture pipeline</p>
+        <p>Powered by SignSpeak NLP + CWASA avatar pipeline</p>
       </div>
     </div>
   )
