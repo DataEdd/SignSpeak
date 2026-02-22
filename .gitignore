@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Testing
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Large data files (use scripts/download_data.py to fetch)
+data/signavatars/
+data/models/
+data/SMPL_texture_samples/
+data/cache/
+data/downloads/
+data/exports/
+data/signs/*/video.mp4
+data/signs/*/variants/
+
+# Generated output
+output/
+
+# Node
+node_modules/
+apps/web/dist/
+
+# Claude Code
+.claude/
