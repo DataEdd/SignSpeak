@@ -53,3 +53,6 @@ apps/web/dist/
 
 # Claude Code
 .claude/
+
+# CV sync — local notes, never commit
+CV_NOTES.md
