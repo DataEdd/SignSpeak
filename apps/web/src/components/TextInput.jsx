@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
-import { EXAMPLES } from '../data/examples'
+import { SHOWCASE } from '../data/examples'
 import './TextInput.css'
 
-const SAMPLE_PHRASES = EXAMPLES.map((e) => e.phrase)
-
-function TextInput({ onTranslate, isTranslating }) {
+function TextInput({ onTranslate, onShowcase, isTranslating }) {
   const [text, setText] = useState('')
 
   const handleSubmit = (e) => {
@@ -14,16 +12,11 @@ function TextInput({ onTranslate, isTranslating }) {
     }
   }
 
-  const handleSampleClick = (phrase) => {
-    setText(phrase)
-    onTranslate(phrase)
-  }
-
   return (
     <div className="text-input">
       <div className="input-header">
         <h2>Text to ASL Translation</h2>
-        <p>Enter any English text to see it translated to American Sign Language</p>
+        <p>Enter any English text to see it converted to ASL gloss order by the NLP engine.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="input-form">
@@ -55,19 +48,16 @@ function TextInput({ onTranslate, isTranslating }) {
       </form>
 
       <div className="sample-phrases">
-        <h3>Try these examples:</h3>
-        <div className="phrase-list">
-          {SAMPLE_PHRASES.map((phrase, index) => (
-            <button
-              key={index}
-              className="phrase-btn"
-              onClick={() => handleSampleClick(phrase)}
-              disabled={isTranslating}
-            >
-              {phrase}
-            </button>
-          ))}
-        </div>
+        <h3>3D avatar showcase</h3>
+        <p className="showcase-hint">{SHOWCASE.description}</p>
+        <button
+          type="button"
+          className="phrase-btn showcase-btn"
+          onClick={onShowcase}
+          disabled={isTranslating}
+        >
+          ▶ {SHOWCASE.label}
+        </button>
       </div>
     </div>
   )

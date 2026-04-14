@@ -142,3 +142,24 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.showcase-hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.showcase-btn {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--primary-color, #6384ff);
+  color: #fff;
+  border-color: var(--primary-color, #6384ff);
+}
+
+.showcase-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+  color: #fff;
+}

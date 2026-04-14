@@ -1,60 +1,20 @@
-// Preloaded example phrases that ship with a pre-rendered video clip.
-// Matching input skips CWASA at runtime and plays the bundled file directly.
+// Preloaded showcase clip. The live demo is primarily the NLP grammar engine;
+// this single entry is the "what the full system produces" reference video.
 //
-// All glosses used here were audited by scripts/auditAllGlosses.mjs and render
-// cleanly through the CWASA HamNoSys → animation pipeline. The full 131-entry
-// SiGML dictionary is authored at varying quality; we only reference the
-// validated subset so preloaded playback is deterministic.
-//
-// The recorder script at scripts/recordPhrases.mjs reads this list, records
-// one clip per unique gloss, and ffmpeg-concats to apps/web/public/videos/examples/.
+// Source: hackathon-v1/output/avatar_with_captions_synced.mp4 — a 12.8s
+// SMPL-X 3D avatar signing the NWS winter-storm news broadcast with
+// synchronised word-level captions.
 
-export const EXAMPLES = [
-  {
-    phrase: 'Hello',
-    slug: 'hello',
-    glosses: ['HELLO']
-  },
-  {
-    phrase: 'Thank you',
-    slug: 'thank-you',
-    glosses: ['THANK_YOU']
-  },
-  {
-    phrase: 'Please',
-    slug: 'please',
-    glosses: ['PLEASE']
-  },
-  {
-    phrase: 'Good',
-    slug: 'good',
-    glosses: ['GOOD']
-  },
-  {
-    phrase: 'Love',
-    slug: 'love',
-    glosses: ['LOVE']
-  },
-  {
-    phrase: 'Where from?',
-    slug: 'where-from',
-    glosses: ['WHERE', 'FROM']
-  }
-]
-
-/** Normalize user input for comparison against example phrases. */
-export function normalize(text) {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-const BY_NORMALIZED = new Map(
-  EXAMPLES.map((e) => [normalize(e.phrase), e])
-)
-
-export function findExample(text) {
-  return BY_NORMALIZED.get(normalize(text)) || null
+export const SHOWCASE = {
+  id: 'news-broadcast',
+  label: 'Play 3D avatar showcase',
+  description: 'Weather news broadcast signed by our SMPL-X 3D avatar (~13s)',
+  videoPath: 'videos/showcase.mp4',
+  glosses: [
+    'THIS', 'BIG', 'ONE', 'WE', 'TAKE', 'SERIOUS', 'YES',
+    'ABSOLUTE', 'THIS', 'BIG', 'ONE', 'MEAN', 'THINK',
+    'WE', 'HAVE', 'WATCH', 'WARNING', 'NATIONAL', 'WEATHER', 'SERVICE',
+    'STRETCH', 'TWO', 'THOUSAND', 'MILE', 'FROM', 'NEW', 'MEXICO',
+    'ALL', 'WAY', 'NEW', 'ENGLAND', 'THIS', 'BIG', 'STORM'
+  ]
 }

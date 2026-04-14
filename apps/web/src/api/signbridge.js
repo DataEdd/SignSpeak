@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { mockTranslate } from './mockTranslate'
-import { findExample } from '../data/examples'
+import { SHOWCASE } from '../data/examples'
 
 const API_BASE = '/api'
 
@@ -9,48 +9,42 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-function bundledVideoUrl(slug) {
-  // Vite resolves import.meta.env.BASE_URL to '/' in dev and '/SignSpeak/' in prod
-  return `${import.meta.env.BASE_URL}videos/examples/${slug}.mp4`
+function showcaseUrl() {
+  return `${import.meta.env.BASE_URL}${SHOWCASE.videoPath}`
 }
 
-export async function translateText(text) {
-  // Preloaded-phrase path: ship a pre-rendered video, skip backend + CWASA entirely
-  const example = findExample(text)
-  if (example) {
-    return {
-      videoUrl: bundledVideoUrl(example.slug),
-      glosses: example.glosses,
-      confidence: 1.0,
-      sigml: null,
-      isDemo: false,
-      isPreloaded: true
-    }
+/** Resolve the showcase — a single pre-rendered 3D avatar clip. */
+export function getShowcase() {
+  return {
+    videoUrl: showcaseUrl(),
+    glosses: SHOWCASE.glosses,
+    label: SHOWCASE.label,
+    description: SHOWCASE.description,
+    isShowcase: true
   }
+}
 
+/**
+ * Translate arbitrary English text to ASL glosses. If a backend is reachable
+ * it's used; otherwise the client-side grammar engine runs. There is no
+ * avatar for arbitrary text — the UI shows the gloss sequence.
+ */
+export async function translateText(text) {
   try {
     const response = await api.post('/translate', { text })
     return {
-      videoUrl: response.data.video_url,
+      videoUrl: response.data.video_url || null,
       glosses: response.data.glosses || [],
       confidence: response.data.confidence,
-      sigml: response.data.sigml || null,
-      isDemo: false,
-      isPreloaded: false
+      isShowcase: false
     }
   } catch (error) {
     const data = error.response?.data
     if (error.response && typeof data === 'object' && data?.message) {
       throw new Error(data.message)
     }
-    // Backend unreachable (e.g. on GitHub Pages): fall back to client-side NLP
     const result = mockTranslate(text)
-    return {
-      videoUrl: null,
-      sigml: result.sigml || null,
-      isPreloaded: false,
-      ...result
-    }
+    return { videoUrl: null, isShowcase: false, ...result }
   }
 }
 

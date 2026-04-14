@@ -1,9 +1,9 @@
 /**
- * Client-side ASL grammar engine for demo mode.
- * Mirrors the real backend's translation pipeline so the GitHub Pages
- * demo works without a running server.
+ * Client-side ASL grammar engine. On GitHub Pages there is no backend, so
+ * this runs entirely in the browser and is the main experience for
+ * non-preloaded input. Produces the ASL gloss sequence; no video is
+ * generated for arbitrary input — the preloaded showcase is the only video.
  */
-import { glossesToSigml } from './sigmlLookup'
 
 const ARTICLES = new Set(['a', 'an', 'the'])
 const BE_VERBS = new Set(['is', 'are', 'was', 'were', 'am', 'be', 'been', 'being'])
@@ -37,19 +37,12 @@ function simplifyVerb(word) {
 }
 
 /**
- * Translate English text to ASL gloss order.
- *
- * Rules applied (simplified ASL grammar):
- *  1. Tokenize and lowercase
- *  2. Remove articles, be-verbs, auxiliaries
- *  3. Simplify verb forms (-ing, -ed → base)
- *  4. Move time words to front
- *  5. Move WH-words to end (question reordering)
- *  6. Move negation to end
- *  7. Uppercase all glosses
- *
- * @param {string} text - English sentence
- * @returns {{ glosses: string[], confidence: number, isDemo: true, sigml: string|null }}
+ * English → ASL gloss sequence. Simplified ASL grammar rules:
+ *  1. Tokenize + lowercase
+ *  2. Drop articles, be-verbs, auxiliaries
+ *  3. Simplify verbs (-ing, -ed → base)
+ *  4. Fronts time words; pushes WH-words and negation to the end
+ *  5. Uppercase glosses
  */
 export function mockTranslate(text) {
   if (!text || !text.trim()) {
@@ -75,7 +68,7 @@ export function mockTranslate(text) {
     } else if (NEGATIONS.has(token)) {
       negTokens.push('NOT')
     } else if (ARTICLES.has(token) || BE_VERBS.has(token) || AUXILIARIES.has(token)) {
-      // drop these
+      // drop
     } else {
       mainTokens.push(simplifyVerb(token))
     }
@@ -87,11 +80,8 @@ export function mockTranslate(text) {
     ...mainTokens,
     ...whTokens,
     ...negTokens,
-  ].map(g => g.toUpperCase())
+  ].map((g) => g.toUpperCase())
 
   const confidence = Math.max(0.65, 0.95 - tokens.length * 0.01)
-
-  const sigml = glossesToSigml(glosses)
-
-  return { glosses, confidence, isDemo: true, sigml }
+  return { glosses, confidence, isDemo: true }
 }

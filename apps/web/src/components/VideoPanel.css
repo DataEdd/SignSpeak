@@ -1,16 +1,16 @@
-/* Demo display: Avatar + GlossAnimation stacked */
-.demo-display {
+/* Gloss-only layout for non-showcase translations */
+.gloss-only-display {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.approximation-banner {
+.gloss-only-note {
   padding: 10px 14px;
   border-radius: 8px;
-  background: rgba(255, 196, 0, 0.10);
-  border: 1px solid rgba(255, 196, 0, 0.35);
-  color: #ffd266;
+  background: rgba(99, 132, 255, 0.10);
+  border: 1px solid rgba(99, 132, 255, 0.35);
+  color: #a7b9ff;
   font-size: 13px;
   line-height: 1.4;
 }

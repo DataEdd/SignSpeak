@@ -1,48 +1,36 @@
-// End-to-end verification of the built demo:
-//   1. Preloaded phrase → bundled MP4 plays
-//   2. Non-preloaded phrase → CWASA avatar path engages
+// End-to-end smoke test of the built demo.
+//   1. The showcase button plays the bundled 3D avatar MP4
+//   2. Arbitrary input produces glosses via the client-side NLP engine
 //
-// Assumes `npx vite preview` is running (default localhost:4173 with /SignSpeak/ base).
+// Assumes `npx vite preview --port 4173` is running.
 
 import { chromium } from 'playwright'
 
 const BASE = process.env.PREVIEW_URL || 'http://localhost:4173/SignSpeak/'
 
-const browser = await chromium.launch({
-  headless: true,
-  args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist']
-})
+const browser = await chromium.launch({ headless: true })
 const ctx = await browser.newContext()
 const page = await ctx.newPage()
 
-const consoleLogs = []
-const network = []
-page.on('console', (m) => consoleLogs.push(`[${m.type()}] ${m.text()}`))
-page.on('pageerror', (e) => consoleLogs.push(`[err] ${e.message}`))
-page.on('response', (r) => {
-  if (/videos\/examples|allcsa|cwasa\.css|avatars\//i.test(r.url())) {
-    network.push(`${r.status()} ${r.url()}`)
+const consoleErrors = []
+page.on('console', (m) => {
+  if (m.type() === 'error' && !/React DevTools|500 \(Internal/.test(m.text())) {
+    consoleErrors.push(m.text())
   }
 })
+page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${e.message}`))
 
-console.log('--- Step 1: preloaded phrase ---')
+const network = []
+page.on('response', (r) => {
+  if (/videos\/showcase|\.mp4/i.test(r.url())) network.push(`${r.status()} ${r.url()}`)
+})
+
 await page.goto(BASE, { waitUntil: 'domcontentloaded' })
-await page.waitForSelector('.phrase-btn')
-await page.click('.phrase-btn') // first preloaded phrase
 
-// Preloaded path should render a <video> with the bundled mp4 src
-const preloaded = await page.waitForFunction(
-  () => {
-    const v = document.querySelector('video.sign-video')
-    return v ? { src: v.currentSrc || v.src, error: !!v.error } : null
-  },
-  null,
-  { timeout: 15000 }
-).then((h) => h.jsonValue())
+console.log('--- Step 1: showcase button plays bundled video ---')
+await page.waitForSelector('.showcase-btn', { timeout: 10000 })
+await page.click('.showcase-btn')
 
-console.log('preloaded video:', preloaded)
-
-// Wait for it to load + play a little
 await page.waitForFunction(
   () => {
     const v = document.querySelector('video.sign-video')
@@ -50,67 +38,69 @@ await page.waitForFunction(
   },
   null,
   { timeout: 15000 }
-).catch((e) => console.log('preloaded load failed:', e.message))
+).catch((e) => console.log('video load failed:', e.message))
 
-const preloadedStats = await page.evaluate(() => {
+const stats = await page.evaluate(() => {
   const v = document.querySelector('video.sign-video')
-  if (!v) return null
-  return {
+  const heading = document.querySelector('.video-header h2')?.textContent || null
+  const info = document.querySelector('.video-info')?.textContent || null
+  return v ? {
+    src: v.currentSrc,
     duration: v.duration,
-    readyState: v.readyState,
+    videoW: v.videoWidth,
+    videoH: v.videoHeight,
     error: v.error?.message || null,
-    videoWidth: v.videoWidth,
-    videoHeight: v.videoHeight
-  }
+    heading,
+    info
+  } : null
 })
-console.log('preloaded stats:', preloadedStats)
+console.log('showcase stats:', stats)
 
-// Look for the preloaded caption
-const caption = await page.textContent('.video-info').catch(() => null)
-console.log('caption:', caption)
-
-console.log('\n--- Step 2: non-preloaded phrase (CWASA path) ---')
-await page.fill('textarea', 'this is a custom sentence not in examples')
+console.log('\n--- Step 2: arbitrary input → grammar-only output ---')
+await page.fill('textarea', 'I am going to the store tomorrow')
 await page.click('.translate-btn')
 
-// CWASA should init and render a canvas within 30s
+// Wait until the video element unmounts (videoUrl becomes null) and glosses
+// reflect the new input (expected lead token is TOMORROW from time-fronting rule)
 await page.waitForFunction(
   () => {
-    const c = document.querySelector('.CWASAAvatar canvas')
-    return !!(c && c.width > 0)
+    const tags = Array.from(document.querySelectorAll('.gloss-tag')).map((n) => n.textContent)
+    const noVideo = !document.querySelector('video.sign-video')
+    return noVideo && tags[0] === 'TOMORROW'
   },
   null,
-  { timeout: 30000 }
-).catch((e) => console.log('CWASA canvas wait failed:', e.message))
+  { timeout: 8000 }
+).catch((e) => console.log('grammar state did not update:', e.message))
 
-const cwasaStats = await page.evaluate(() => {
-  const c = document.querySelector('.CWASAAvatar canvas')
-  const banner = document.querySelector('.approximation-banner')
-  return {
-    canvasW: c?.width,
-    canvasH: c?.height,
-    bannerVisible: !!banner && banner.offsetHeight > 0,
-    bannerText: banner?.textContent || null,
-    cwasaReady: !!window.CWASA?.ready
-  }
-})
-console.log('cwasa stats:', cwasaStats)
+const grammarStats = await page.evaluate(() => ({
+  glosses: Array.from(document.querySelectorAll('.gloss-tag')).map((n) => n.textContent),
+  note: document.querySelector('.gloss-only-note')?.textContent || null,
+  videoPresent: !!document.querySelector('video.sign-video'),
+  avatarAnchorPresent: !!document.querySelector('.CWASAAvatar')
+}))
+console.log('grammar stats:', grammarStats)
 
 await page.screenshot({ path: '/tmp/verify-demo.png', fullPage: true })
 
-console.log('\n--- Network (relevant) ---')
-for (const n of network) console.log('  ', n)
+console.log('\n--- Network ---')
+for (const n of network) console.log(' ', n)
 
-const errorsSeen = consoleLogs.filter((l) => l.startsWith('[err]') || l.startsWith('[error]') && !l.includes('React DevTools'))
-console.log('\n--- Errors seen ---')
-for (const e of errorsSeen) console.log('  ', e)
+if (consoleErrors.length) {
+  console.log('\n--- Console errors (unexpected) ---')
+  for (const e of consoleErrors) console.log(' ', e)
+}
 
 await browser.close()
 
-// Exit-code contract: fail loudly if either path is broken
-const preloadedOk = preloadedStats && preloadedStats.duration > 0.1 && !preloadedStats.error && preloadedStats.videoWidth > 0
-const cwasaOk = cwasaStats.canvasW > 0 && cwasaStats.canvasH > 0 && cwasaStats.bannerVisible
+const showcaseOk =
+  stats && stats.duration > 0.1 && !stats.error && stats.videoW > 0 &&
+  /showcase\.mp4/i.test(stats.src)
+const grammarOk =
+  grammarStats.glosses.length > 0 &&
+  !grammarStats.videoPresent &&
+  !grammarStats.avatarAnchorPresent
+
 console.log('\n--- Verdict ---')
-console.log('preloaded:', preloadedOk ? 'OK' : 'FAIL')
-console.log('cwasa:', cwasaOk ? 'OK' : 'FAIL')
-process.exit(preloadedOk && cwasaOk ? 0 : 1)
+console.log('showcase:', showcaseOk ? 'OK' : 'FAIL')
+console.log('grammar :', grammarOk ? 'OK' : 'FAIL')
+process.exit(showcaseOk && grammarOk ? 0 : 1)

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import TextInput from './components/TextInput'
 import VideoPanel from './components/VideoPanel'
-import { translateText } from './api/signbridge'
+import { translateText, getShowcase } from './api/signbridge'
 import './App.css'
 
 function App() {
@@ -11,36 +11,38 @@ function App() {
   const [error, setError] = useState(null)
   const [glosses, setGlosses] = useState([])
   const [confidence, setConfidence] = useState(null)
-  const [isDemo, setIsDemo] = useState(false)
-  const [sigml, setSigml] = useState(null)
-  const [isPreloaded, setIsPreloaded] = useState(false)
+  const [isShowcase, setIsShowcase] = useState(false)
 
   const handleTranslate = useCallback(async (text) => {
     if (!text.trim()) return
-
     setIsTranslating(true)
     setError(null)
     setCurrentText(text)
-
     try {
       const result = await translateText(text)
       setVideoUrl(result.videoUrl)
       setGlosses(result.glosses || [])
       setConfidence(result.confidence)
-      setIsDemo(!!result.isDemo)
-      setSigml(result.sigml || null)
-      setIsPreloaded(!!result.isPreloaded)
+      setIsShowcase(!!result.isShowcase)
     } catch (err) {
       setError(err.message || 'Translation failed')
       setVideoUrl(null)
       setGlosses([])
       setConfidence(null)
-      setIsDemo(false)
-      setSigml(null)
-      setIsPreloaded(false)
+      setIsShowcase(false)
     } finally {
       setIsTranslating(false)
     }
+  }, [])
+
+  const handleShowcase = useCallback(() => {
+    setError(null)
+    const s = getShowcase()
+    setCurrentText(s.description)
+    setVideoUrl(s.videoUrl)
+    setGlosses(s.glosses)
+    setConfidence(null)
+    setIsShowcase(true)
   }, [])
 
   return (
@@ -51,7 +53,7 @@ function App() {
             <span className="logo-icon">&#x1F91F;</span>
             SignSpeak
           </h1>
-          <p className="tagline">Text to Sign Language Video Translation</p>
+          <p className="tagline">English → ASL grammar conversion + 3D avatar showcase</p>
         </div>
       </header>
 
@@ -60,55 +62,46 @@ function App() {
           <div className="text-section">
             <TextInput
               onTranslate={handleTranslate}
+              onShowcase={handleShowcase}
               isTranslating={isTranslating}
             />
             {currentText && (
               <div className="translation-info">
-                <h3>Input Text:</h3>
+                <h3>{isShowcase ? 'Showcase:' : 'Input Text:'}</h3>
                 <p className="input-text">{currentText}</p>
                 {glosses.length > 0 && (
                   <>
                     <h3>ASL Glosses:</h3>
                     <div className="gloss-list">
                       {glosses.map((gloss, index) => (
-                        <span key={index} className="gloss-tag">
-                          {gloss}
-                        </span>
+                        <span key={index} className="gloss-tag">{gloss}</span>
                       ))}
                     </div>
                   </>
                 )}
                 {confidence !== null && (
-                  <p className="confidence">
-                    Confidence: {(confidence * 100).toFixed(0)}%
-                  </p>
+                  <p className="confidence">Confidence: {(confidence * 100).toFixed(0)}%</p>
                 )}
               </div>
             )}
           </div>
 
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
+          {error && <div className="error-message">{error}</div>}
         </div>
 
         <div className="video-area">
           <VideoPanel
             videoUrl={videoUrl}
             isTranslating={isTranslating}
-            isDemo={isDemo}
             glosses={glosses}
             confidence={confidence}
-            sigml={sigml}
-            isPreloaded={isPreloaded}
+            isShowcase={isShowcase}
           />
         </div>
       </main>
 
       <footer className="app-footer">
-        <p>SignSpeak - Making communication accessible through sign language</p>
+        <p>SignSpeak — Making communication accessible through sign language</p>
       </footer>
     </div>
   )
