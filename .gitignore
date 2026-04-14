@@ -50,6 +50,7 @@ output/
 # Node
 node_modules/
 apps/web/dist/
+apps/web/.cache/
 
 # Claude Code
 .claude/

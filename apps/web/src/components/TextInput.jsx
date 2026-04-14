@@ -1,14 +1,8 @@
 import React, { useState } from 'react'
+import { EXAMPLES } from '../data/examples'
 import './TextInput.css'
 
-const SAMPLE_PHRASES = [
-  "Hello, how are you?",
-  "Thank you very much",
-  "What is your name?",
-  "I want to learn sign language",
-  "Good morning, nice to meet you",
-  "Where is the school?"
-]
+const SAMPLE_PHRASES = EXAMPLES.map((e) => e.phrase)
 
 function TextInput({ onTranslate, isTranslating }) {
   const [text, setText] = useState('')

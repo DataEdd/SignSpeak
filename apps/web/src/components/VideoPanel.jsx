@@ -3,7 +3,7 @@ import GlossAnimation from './GlossAnimation'
 import AvatarPanel from './AvatarPanel'
 import './VideoPanel.css'
 
-function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigml }) {
+function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigml, isPreloaded }) {
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState(null)
@@ -51,10 +51,15 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
     }
   }
 
-  // Demo mode: show Avatar (which records video) + GlossAnimation
+  // Demo mode: show Avatar (which records video) + GlossAnimation.
+  // This path renders non-preloaded input through a best-effort CWASA avatar —
+  // NLP ASL grammar works, but individual sign rendering is approximate.
   if (isDemo && !videoUrl) {
     return (
       <div className="demo-display">
+        <div className="approximation-banner">
+          Avatar is a best-effort approximation. For sign-accurate ASL, try a preloaded example phrase.
+        </div>
         {!avatarFailed && (
           <AvatarPanel
             sigml={sigml}
@@ -120,7 +125,9 @@ function VideoPanel({ videoUrl, isTranslating, isDemo, glosses, confidence, sigm
       </div>
 
       <div className="video-info">
-        <p>Powered by SignSpeak NLP + CWASA avatar pipeline</p>
+        {isPreloaded
+          ? <p>Preloaded example — sign-accurate ASL clip</p>
+          : <p>Powered by SignSpeak NLP + CWASA avatar pipeline</p>}
       </div>
     </div>
   )

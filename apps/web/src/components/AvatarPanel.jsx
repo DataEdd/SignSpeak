@@ -4,13 +4,12 @@ import { useCanvasRecorder } from '../hooks/useCanvasRecorder'
 import './AvatarPanel.css'
 
 function findCWASACanvas() {
-  return document.querySelector('#CWASAAvatar canvas')
-    || document.querySelector('.CWASAvatarPanel canvas')
+  return document.querySelector('.CWASAAvatar canvas')
     || document.querySelector('.cwasa-avatar-wrapper canvas')
 }
 
-function AvatarPanel({ sigml, speed = 1.0, onLoadFailed, onVideoRecorded }) {
-  const { isReady, isPlaying, error, playSigml, stop } = useCWASA(speed)
+function AvatarPanel({ sigml, onLoadFailed, onVideoRecorded }) {
+  const { isReady, isPlaying, error, playSigml, stop } = useCWASA()
   const { isRecording, videoUrl, startRecording, stopRecording, clearRecording } = useCanvasRecorder()
   const [showFallback, setShowFallback] = useState(false)
   const prevPlayingRef = useRef(false)
@@ -86,7 +85,7 @@ function AvatarPanel({ sigml, speed = 1.0, onLoadFailed, onVideoRecorded }) {
 
       {/* Always keep CWASA element in DOM; hide when showing recorded video */}
       <div className="avatar-container" style={{ display: videoUrl && !isPlaying ? 'none' : undefined }}>
-        <div id="CWASAAvatar" className="cwasa-avatar-wrapper" />
+        <div className="CWASAAvatar av0 cwasa-avatar-wrapper" />
       </div>
 
       {/* Show recorded video when available and avatar is not actively playing */}

@@ -13,6 +13,7 @@ function App() {
   const [confidence, setConfidence] = useState(null)
   const [isDemo, setIsDemo] = useState(false)
   const [sigml, setSigml] = useState(null)
+  const [isPreloaded, setIsPreloaded] = useState(false)
 
   const handleTranslate = useCallback(async (text) => {
     if (!text.trim()) return
@@ -28,6 +29,7 @@ function App() {
       setConfidence(result.confidence)
       setIsDemo(!!result.isDemo)
       setSigml(result.sigml || null)
+      setIsPreloaded(!!result.isPreloaded)
     } catch (err) {
       setError(err.message || 'Translation failed')
       setVideoUrl(null)
@@ -35,6 +37,7 @@ function App() {
       setConfidence(null)
       setIsDemo(false)
       setSigml(null)
+      setIsPreloaded(false)
     } finally {
       setIsTranslating(false)
     }
@@ -99,6 +102,7 @@ function App() {
             glosses={glosses}
             confidence={confidence}
             sigml={sigml}
+            isPreloaded={isPreloaded}
           />
         </div>
       </main>

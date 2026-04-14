@@ -1,16 +1,33 @@
 import axios from 'axios'
 import { mockTranslate } from './mockTranslate'
+import { findExample } from '../data/examples'
 
 const API_BASE = '/api'
 
 const api = axios.create({
   baseURL: API_BASE,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  headers: { 'Content-Type': 'application/json' }
 })
 
+function bundledVideoUrl(slug) {
+  // Vite resolves import.meta.env.BASE_URL to '/' in dev and '/SignSpeak/' in prod
+  return `${import.meta.env.BASE_URL}videos/examples/${slug}.mp4`
+}
+
 export async function translateText(text) {
+  // Preloaded-phrase path: ship a pre-rendered video, skip backend + CWASA entirely
+  const example = findExample(text)
+  if (example) {
+    return {
+      videoUrl: bundledVideoUrl(example.slug),
+      glosses: example.glosses,
+      confidence: 1.0,
+      sigml: null,
+      isDemo: false,
+      isPreloaded: true
+    }
+  }
+
   try {
     const response = await api.post('/translate', { text })
     return {
@@ -19,16 +36,21 @@ export async function translateText(text) {
       confidence: response.data.confidence,
       sigml: response.data.sigml || null,
       isDemo: false,
+      isPreloaded: false
     }
   } catch (error) {
-    // Only throw if we got a real JSON error from our backend
     const data = error.response?.data
     if (error.response && typeof data === 'object' && data?.message) {
       throw new Error(data.message)
     }
-    // Backend unreachable or not our API (e.g. GitHub Pages 404) — fall back to mock
+    // Backend unreachable (e.g. on GitHub Pages): fall back to client-side NLP
     const result = mockTranslate(text)
-    return { videoUrl: null, sigml: result.sigml || null, ...result }
+    return {
+      videoUrl: null,
+      sigml: result.sigml || null,
+      isPreloaded: false,
+      ...result
+    }
   }
 }
 
