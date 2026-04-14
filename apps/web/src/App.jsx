@@ -9,7 +9,6 @@ function App() {
   const [inputText, setInputText] = useState('')
   const [glosses, setGlosses] = useState([])
   const [confidence, setConfidence] = useState(null)
-  const [isShowcase, setIsShowcase] = useState(false)
   const [showcaseVideoUrl, setShowcaseVideoUrl] = useState(null)
   const [isTranslating, setIsTranslating] = useState(false)
   const [error, setError] = useState(null)
@@ -23,25 +22,20 @@ function App() {
       const result = await translateText(text)
       setGlosses(result.glosses || [])
       setConfidence(result.confidence ?? null)
-      setIsShowcase(false)
     } catch (err) {
       setError(err.message || 'Translation failed')
       setGlosses([])
       setConfidence(null)
-      setIsShowcase(false)
     } finally {
       setIsTranslating(false)
     }
   }, [])
 
+  // Playing the showcase doesn't touch the grammar panel — that view is
+  // reserved for typed input. Just surface the pre-rendered video.
   const handleShowcase = useCallback(() => {
     setError(null)
-    const s = getShowcase()
-    setInputText(s.description)
-    setGlosses(s.glosses)
-    setConfidence(null)
-    setIsShowcase(true)
-    setShowcaseVideoUrl(s.videoUrl)
+    setShowcaseVideoUrl(getShowcase().videoUrl)
   }, [])
 
   const handleCloseShowcase = useCallback(() => {
@@ -76,7 +70,6 @@ function App() {
               inputText={inputText}
               glosses={glosses}
               confidence={confidence}
-              isShowcase={isShowcase}
               isTranslating={isTranslating}
             />
           </div>

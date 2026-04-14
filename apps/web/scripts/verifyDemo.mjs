@@ -1,7 +1,6 @@
 // E2E smoke test of the built demo.
-//   1. Arbitrary input shows glosses in the right-side NLP panel, no video
-//   2. Play-showcase reveals a full-width video row below the top row,
-//      and still shows glosses on the right
+//   1. NLP grammar: typed input → glosses on right, no video
+//   2. Showcase:    Play button → full-width video below, GLOSSES UNCHANGED
 //
 // Assumes `npx vite preview --port 4173` is running.
 
@@ -38,12 +37,12 @@ await page.waitForFunction(
 const step1 = await page.evaluate(() => ({
   glosses: Array.from(document.querySelectorAll('.gloss-panel .gloss-text')).map((n) => n.textContent),
   inputShown: document.querySelector('.gloss-panel-input p')?.textContent || null,
-  showcaseVideoPresent: !!document.querySelector('.showcase-row video'),
-  avatarAnchorPresent: !!document.querySelector('.CWASAAvatar')
+  showcaseVideoPresent: !!document.querySelector('.showcase-row video')
 }))
 console.log('step1:', step1)
 
-console.log('\n--- Step 2: showcase ---')
+console.log('\n--- Step 2: showcase (glosses must not change) ---')
+const glossesBeforeShowcase = step1.glosses.join(',')
 await page.click('.showcase-btn')
 await page.waitForFunction(
   () => {
@@ -53,30 +52,31 @@ await page.waitForFunction(
   null,
   { timeout: 15000 }
 )
-const step2 = await page.evaluate(() => {
+const step2 = await page.evaluate((prev) => {
   const v = document.querySelector('.showcase-row video.sign-video')
   const showcaseRow = document.querySelector('.showcase-row')
+  const topRow = document.querySelector('.top-row')
   const gloss = document.querySelector('.gloss-panel')
   const textInput = document.querySelector('.text-input')
-  const topRow = document.querySelector('.top-row')
-  // Layout sanity: top-row contains both text + gloss side-by-side; showcase-row is BELOW them
   const topRect = topRow?.getBoundingClientRect()
   const showcaseRect = showcaseRow?.getBoundingClientRect()
   const glossRect = gloss?.getBoundingClientRect()
   const textRect = textInput?.getBoundingClientRect()
+  const currentGlosses = Array.from(document.querySelectorAll('.gloss-panel .gloss-text')).map((n) => n.textContent).join(',')
   return {
     videoSrc: v?.currentSrc,
-    duration: v?.duration,
     videoW: v?.videoWidth,
     videoH: v?.videoHeight,
-    glossHeading: document.querySelector('.gloss-panel-header h2')?.textContent,
-    glossTags: Array.from(document.querySelectorAll('.gloss-panel .gloss-text')).map((n) => n.textContent).slice(0, 5),
+    duration: v?.duration,
+    hasAudio: !!v && v.mozHasAudio !== false,
+    glossesUnchanged: currentGlosses === prev,
+    currentGlosses,
     layout: {
       glossRightOfText: glossRect && textRect ? glossRect.left >= textRect.right - 1 : null,
       showcaseBelowTop: showcaseRect && topRect ? showcaseRect.top >= topRect.bottom - 1 : null
     }
   }
-})
+}, glossesBeforeShowcase)
 console.log('step2:', step2)
 
 await page.screenshot({ path: '/tmp/verify-demo.png', fullPage: true })
@@ -89,14 +89,14 @@ if (consoleErrors.length) {
 await browser.close()
 
 const step1Ok =
-  step1.glosses.length > 0 && step1.glosses[0] === 'TOMORROW' &&
-  !step1.showcaseVideoPresent && !step1.avatarAnchorPresent
+  step1.glosses.length > 0 && step1.glosses[0] === 'TOMORROW' && !step1.showcaseVideoPresent
 const step2Ok =
   step2.videoSrc && /showcase\.mp4/.test(step2.videoSrc) &&
   step2.duration > 0.1 && step2.videoW > 0 &&
-  step2.glossTags.length > 0 && step2.layout.glossRightOfText && step2.layout.showcaseBelowTop
+  step2.glossesUnchanged &&
+  step2.layout.glossRightOfText && step2.layout.showcaseBelowTop
 
 console.log('\n--- Verdict ---')
-console.log('nlp output on right, no video :', step1Ok ? 'OK' : 'FAIL')
-console.log('showcase below, glosses right :', step2Ok ? 'OK' : 'FAIL')
+console.log('nlp step   :', step1Ok ? 'OK' : 'FAIL')
+console.log('showcase   :', step2Ok ? 'OK' : 'FAIL')
 process.exit(step1Ok && step2Ok ? 0 : 1)

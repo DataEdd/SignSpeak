@@ -2,7 +2,7 @@ import React from 'react'
 import GlossAnimation from './GlossAnimation'
 import './GlossPanel.css'
 
-function GlossPanel({ inputText, glosses, confidence, isShowcase, isTranslating }) {
+function GlossPanel({ inputText, glosses, confidence, isTranslating }) {
   const empty = !inputText && glosses.length === 0
 
   return (
@@ -14,8 +14,7 @@ function GlossPanel({ inputText, glosses, confidence, isShowcase, isTranslating 
 
       {empty && !isTranslating && (
         <div className="gloss-panel-empty">
-          Type a sentence and press <strong>Translate</strong> to see ASL gloss order,
-          or press <strong>Play 3D avatar showcase</strong> for a pre-rendered example.
+          Type a sentence and press <strong>Translate</strong> to see ASL gloss order.
         </div>
       )}
 
@@ -26,7 +25,7 @@ function GlossPanel({ inputText, glosses, confidence, isShowcase, isTranslating 
       {!empty && (
         <>
           <div className="gloss-panel-input">
-            <span className="gloss-panel-label">{isShowcase ? 'Showcase:' : 'Input:'}</span>
+            <span className="gloss-panel-label">Input:</span>
             <p>{inputText}</p>
           </div>
           <GlossAnimation glosses={glosses} confidence={confidence} />

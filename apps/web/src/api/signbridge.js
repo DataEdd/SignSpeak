@@ -17,10 +17,8 @@ function showcaseUrl() {
 export function getShowcase() {
   return {
     videoUrl: showcaseUrl(),
-    glosses: SHOWCASE.glosses,
     label: SHOWCASE.label,
-    description: SHOWCASE.description,
-    isShowcase: true
+    description: SHOWCASE.description
   }
 }
 

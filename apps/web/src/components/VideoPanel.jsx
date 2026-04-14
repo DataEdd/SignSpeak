@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import './VideoPanel.css'
 
-function VideoPanel({ videoUrl, isShowcase, onClose }) {
+function VideoPanel({ videoUrl, onClose }) {
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState(null)
@@ -26,7 +26,7 @@ function VideoPanel({ videoUrl, isShowcase, onClose }) {
   return (
     <div className="video-panel">
       <div className="video-header">
-        <h2>{isShowcase ? '3D Avatar Showcase' : 'ASL Translation'}</h2>
+        <h2>3D Avatar Showcase</h2>
         <div className="video-header-right">
           {isPlaying && <span className="status-badge playing">Playing</span>}
           {!isPlaying && <span className="status-badge ready">Ready</span>}
@@ -53,19 +53,13 @@ function VideoPanel({ videoUrl, isShowcase, onClose }) {
       {error && <div className="video-error"><p>{error}</p></div>}
 
       <div className="video-actions">
-        <button
-          className="action-btn replay-btn"
-          onClick={handleReplay}
-          disabled={!videoUrl}
-        >
+        <button className="action-btn replay-btn" onClick={handleReplay} disabled={!videoUrl}>
           Replay
         </button>
       </div>
 
       <div className="video-info">
-        {isShowcase
-          ? <p>Pre-rendered SMPL-X 3D avatar signing the NWS winter-storm news broadcast. Captions synced below the avatar.</p>
-          : <p>Video generated server-side</p>}
+        <p>NWS winter-storm news broadcast (left) synced with our SMPL-X 3D avatar (right). Captions beneath.</p>
       </div>
     </div>
   )
