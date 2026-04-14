@@ -1,32 +1,31 @@
 import React, { useState, useCallback } from 'react'
 import TextInput from './components/TextInput'
+import GlossPanel from './components/GlossPanel'
 import VideoPanel from './components/VideoPanel'
 import { translateText, getShowcase } from './api/signbridge'
 import './App.css'
 
 function App() {
-  const [videoUrl, setVideoUrl] = useState(null)
-  const [currentText, setCurrentText] = useState('')
-  const [isTranslating, setIsTranslating] = useState(false)
-  const [error, setError] = useState(null)
+  const [inputText, setInputText] = useState('')
   const [glosses, setGlosses] = useState([])
   const [confidence, setConfidence] = useState(null)
   const [isShowcase, setIsShowcase] = useState(false)
+  const [showcaseVideoUrl, setShowcaseVideoUrl] = useState(null)
+  const [isTranslating, setIsTranslating] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleTranslate = useCallback(async (text) => {
     if (!text.trim()) return
     setIsTranslating(true)
     setError(null)
-    setCurrentText(text)
+    setInputText(text)
     try {
       const result = await translateText(text)
-      setVideoUrl(result.videoUrl)
       setGlosses(result.glosses || [])
-      setConfidence(result.confidence)
-      setIsShowcase(!!result.isShowcase)
+      setConfidence(result.confidence ?? null)
+      setIsShowcase(false)
     } catch (err) {
       setError(err.message || 'Translation failed')
-      setVideoUrl(null)
       setGlosses([])
       setConfidence(null)
       setIsShowcase(false)
@@ -38,11 +37,15 @@ function App() {
   const handleShowcase = useCallback(() => {
     setError(null)
     const s = getShowcase()
-    setCurrentText(s.description)
-    setVideoUrl(s.videoUrl)
+    setInputText(s.description)
     setGlosses(s.glosses)
     setConfidence(null)
     setIsShowcase(true)
+    setShowcaseVideoUrl(s.videoUrl)
+  }, [])
+
+  const handleCloseShowcase = useCallback(() => {
+    setShowcaseVideoUrl(null)
   }, [])
 
   return (
@@ -58,46 +61,36 @@ function App() {
       </header>
 
       <main className="app-main">
-        <div className="content-area">
+        <div className="top-row">
           <div className="text-section">
             <TextInput
               onTranslate={handleTranslate}
               onShowcase={handleShowcase}
               isTranslating={isTranslating}
             />
-            {currentText && (
-              <div className="translation-info">
-                <h3>{isShowcase ? 'Showcase:' : 'Input Text:'}</h3>
-                <p className="input-text">{currentText}</p>
-                {glosses.length > 0 && (
-                  <>
-                    <h3>ASL Glosses:</h3>
-                    <div className="gloss-list">
-                      {glosses.map((gloss, index) => (
-                        <span key={index} className="gloss-tag">{gloss}</span>
-                      ))}
-                    </div>
-                  </>
-                )}
-                {confidence !== null && (
-                  <p className="confidence">Confidence: {(confidence * 100).toFixed(0)}%</p>
-                )}
-              </div>
-            )}
+            {error && <div className="error-message">{error}</div>}
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          <div className="gloss-section">
+            <GlossPanel
+              inputText={inputText}
+              glosses={glosses}
+              confidence={confidence}
+              isShowcase={isShowcase}
+              isTranslating={isTranslating}
+            />
+          </div>
         </div>
 
-        <div className="video-area">
-          <VideoPanel
-            videoUrl={videoUrl}
-            isTranslating={isTranslating}
-            glosses={glosses}
-            confidence={confidence}
-            isShowcase={isShowcase}
-          />
-        </div>
+        {showcaseVideoUrl && (
+          <div className="showcase-row">
+            <VideoPanel
+              videoUrl={showcaseVideoUrl}
+              isShowcase={true}
+              onClose={handleCloseShowcase}
+            />
+          </div>
+        )}
       </main>
 
       <footer className="app-footer">

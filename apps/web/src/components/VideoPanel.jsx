@@ -1,8 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
-import GlossAnimation from './GlossAnimation'
 import './VideoPanel.css'
 
-function VideoPanel({ videoUrl, isTranslating, glosses, confidence, isShowcase }) {
+function VideoPanel({ videoUrl, isShowcase, onClose }) {
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState(null)
@@ -15,6 +14,8 @@ function VideoPanel({ videoUrl, isTranslating, glosses, confidence, isShowcase }
     }
   }, [videoUrl])
 
+  if (!videoUrl) return null
+
   const handleReplay = () => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0
@@ -22,27 +23,16 @@ function VideoPanel({ videoUrl, isTranslating, glosses, confidence, isShowcase }
     }
   }
 
-  // Non-showcase translation: show gloss sequence only (no video).
-  // The live demo surface is the grammar engine; the 3D avatar is the showcase.
-  if (!videoUrl) {
-    return (
-      <div className="gloss-only-display">
-        <div className="gloss-only-note">
-          NLP grammar engine output — see the 3D avatar showcase for a rendered example.
-        </div>
-        <GlossAnimation glosses={glosses} confidence={confidence} />
-      </div>
-    )
-  }
-
   return (
     <div className="video-panel">
       <div className="video-header">
         <h2>{isShowcase ? '3D Avatar Showcase' : 'ASL Translation'}</h2>
-        <div className="video-status">
-          {isTranslating && <span className="status-badge translating">Translating...</span>}
+        <div className="video-header-right">
           {isPlaying && <span className="status-badge playing">Playing</span>}
-          {!isTranslating && !isPlaying && <span className="status-badge ready">Ready</span>}
+          {!isPlaying && <span className="status-badge ready">Ready</span>}
+          {onClose && (
+            <button className="video-close-btn" onClick={onClose} aria-label="Close">×</button>
+          )}
         </div>
       </div>
 
@@ -66,7 +56,7 @@ function VideoPanel({ videoUrl, isTranslating, glosses, confidence, isShowcase }
         <button
           className="action-btn replay-btn"
           onClick={handleReplay}
-          disabled={!videoUrl || isTranslating}
+          disabled={!videoUrl}
         >
           Replay
         </button>
@@ -74,7 +64,7 @@ function VideoPanel({ videoUrl, isTranslating, glosses, confidence, isShowcase }
 
       <div className="video-info">
         {isShowcase
-          ? <p>Pre-rendered SMPL-X 3D avatar from the SignAvatars motion-capture dataset</p>
+          ? <p>Pre-rendered SMPL-X 3D avatar signing the NWS winter-storm news broadcast. Captions synced below the avatar.</p>
           : <p>Video generated server-side</p>}
       </div>
     </div>

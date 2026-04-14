@@ -1,0 +1,57 @@
+.gloss-panel {
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.gloss-panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.gloss-panel-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.gloss-panel-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gloss-panel-empty {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 24px 8px;
+  text-align: center;
+}
+
+.gloss-panel-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gloss-panel-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gloss-panel-input p {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}

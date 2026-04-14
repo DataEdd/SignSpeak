@@ -1,6 +1,7 @@
-// End-to-end smoke test of the built demo.
-//   1. The showcase button plays the bundled 3D avatar MP4
-//   2. Arbitrary input produces glosses via the client-side NLP engine
+// E2E smoke test of the built demo.
+//   1. Arbitrary input shows glosses in the right-side NLP panel, no video
+//   2. Play-showcase reveals a full-width video row below the top row,
+//      and still shows glosses on the right
 //
 // Assumes `npx vite preview --port 4173` is running.
 
@@ -20,70 +21,65 @@ page.on('console', (m) => {
 })
 page.on('pageerror', (e) => consoleErrors.push(`pageerror: ${e.message}`))
 
-const network = []
-page.on('response', (r) => {
-  if (/videos\/showcase|\.mp4/i.test(r.url())) network.push(`${r.status()} ${r.url()}`)
-})
-
 await page.goto(BASE, { waitUntil: 'domcontentloaded' })
 
-console.log('--- Step 1: showcase button plays bundled video ---')
-await page.waitForSelector('.showcase-btn', { timeout: 10000 })
-await page.click('.showcase-btn')
-
+console.log('--- Step 1: NLP translation ---')
+await page.fill('textarea', 'I am going to the store tomorrow')
+await page.click('.translate-btn')
 await page.waitForFunction(
   () => {
-    const v = document.querySelector('video.sign-video')
+    const tags = Array.from(document.querySelectorAll('.gloss-panel .gloss-text'))
+      .map((n) => n.textContent)
+    return tags[0] === 'TOMORROW'
+  },
+  null,
+  { timeout: 8000 }
+)
+const step1 = await page.evaluate(() => ({
+  glosses: Array.from(document.querySelectorAll('.gloss-panel .gloss-text')).map((n) => n.textContent),
+  inputShown: document.querySelector('.gloss-panel-input p')?.textContent || null,
+  showcaseVideoPresent: !!document.querySelector('.showcase-row video'),
+  avatarAnchorPresent: !!document.querySelector('.CWASAAvatar')
+}))
+console.log('step1:', step1)
+
+console.log('\n--- Step 2: showcase ---')
+await page.click('.showcase-btn')
+await page.waitForFunction(
+  () => {
+    const v = document.querySelector('.showcase-row video.sign-video')
     return v && v.readyState >= 2 && v.duration > 0
   },
   null,
   { timeout: 15000 }
-).catch((e) => console.log('video load failed:', e.message))
-
-const stats = await page.evaluate(() => {
-  const v = document.querySelector('video.sign-video')
-  const heading = document.querySelector('.video-header h2')?.textContent || null
-  const info = document.querySelector('.video-info')?.textContent || null
-  return v ? {
-    src: v.currentSrc,
-    duration: v.duration,
-    videoW: v.videoWidth,
-    videoH: v.videoHeight,
-    error: v.error?.message || null,
-    heading,
-    info
-  } : null
+)
+const step2 = await page.evaluate(() => {
+  const v = document.querySelector('.showcase-row video.sign-video')
+  const showcaseRow = document.querySelector('.showcase-row')
+  const gloss = document.querySelector('.gloss-panel')
+  const textInput = document.querySelector('.text-input')
+  const topRow = document.querySelector('.top-row')
+  // Layout sanity: top-row contains both text + gloss side-by-side; showcase-row is BELOW them
+  const topRect = topRow?.getBoundingClientRect()
+  const showcaseRect = showcaseRow?.getBoundingClientRect()
+  const glossRect = gloss?.getBoundingClientRect()
+  const textRect = textInput?.getBoundingClientRect()
+  return {
+    videoSrc: v?.currentSrc,
+    duration: v?.duration,
+    videoW: v?.videoWidth,
+    videoH: v?.videoHeight,
+    glossHeading: document.querySelector('.gloss-panel-header h2')?.textContent,
+    glossTags: Array.from(document.querySelectorAll('.gloss-panel .gloss-text')).map((n) => n.textContent).slice(0, 5),
+    layout: {
+      glossRightOfText: glossRect && textRect ? glossRect.left >= textRect.right - 1 : null,
+      showcaseBelowTop: showcaseRect && topRect ? showcaseRect.top >= topRect.bottom - 1 : null
+    }
+  }
 })
-console.log('showcase stats:', stats)
-
-console.log('\n--- Step 2: arbitrary input → grammar-only output ---')
-await page.fill('textarea', 'I am going to the store tomorrow')
-await page.click('.translate-btn')
-
-// Wait until the video element unmounts (videoUrl becomes null) and glosses
-// reflect the new input (expected lead token is TOMORROW from time-fronting rule)
-await page.waitForFunction(
-  () => {
-    const tags = Array.from(document.querySelectorAll('.gloss-tag')).map((n) => n.textContent)
-    const noVideo = !document.querySelector('video.sign-video')
-    return noVideo && tags[0] === 'TOMORROW'
-  },
-  null,
-  { timeout: 8000 }
-).catch((e) => console.log('grammar state did not update:', e.message))
-
-const grammarStats = await page.evaluate(() => ({
-  glosses: Array.from(document.querySelectorAll('.gloss-tag')).map((n) => n.textContent),
-  note: document.querySelector('.gloss-only-note')?.textContent || null,
-  videoPresent: !!document.querySelector('video.sign-video'),
-  avatarAnchorPresent: !!document.querySelector('.CWASAAvatar')
-}))
-console.log('grammar stats:', grammarStats)
+console.log('step2:', step2)
 
 await page.screenshot({ path: '/tmp/verify-demo.png', fullPage: true })
-
-console.log('\n--- Network ---')
-for (const n of network) console.log(' ', n)
 
 if (consoleErrors.length) {
   console.log('\n--- Console errors (unexpected) ---')
@@ -92,15 +88,15 @@ if (consoleErrors.length) {
 
 await browser.close()
 
-const showcaseOk =
-  stats && stats.duration > 0.1 && !stats.error && stats.videoW > 0 &&
-  /showcase\.mp4/i.test(stats.src)
-const grammarOk =
-  grammarStats.glosses.length > 0 &&
-  !grammarStats.videoPresent &&
-  !grammarStats.avatarAnchorPresent
+const step1Ok =
+  step1.glosses.length > 0 && step1.glosses[0] === 'TOMORROW' &&
+  !step1.showcaseVideoPresent && !step1.avatarAnchorPresent
+const step2Ok =
+  step2.videoSrc && /showcase\.mp4/.test(step2.videoSrc) &&
+  step2.duration > 0.1 && step2.videoW > 0 &&
+  step2.glossTags.length > 0 && step2.layout.glossRightOfText && step2.layout.showcaseBelowTop
 
 console.log('\n--- Verdict ---')
-console.log('showcase:', showcaseOk ? 'OK' : 'FAIL')
-console.log('grammar :', grammarOk ? 'OK' : 'FAIL')
-process.exit(showcaseOk && grammarOk ? 0 : 1)
+console.log('nlp output on right, no video :', step1Ok ? 'OK' : 'FAIL')
+console.log('showcase below, glosses right :', step2Ok ? 'OK' : 'FAIL')
+process.exit(step1Ok && step2Ok ? 0 : 1)

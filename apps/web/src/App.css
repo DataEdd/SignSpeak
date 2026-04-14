@@ -38,35 +38,11 @@
   font-size: 14px;
 }
 
-.mode-toggle {
-  display: flex;
-  gap: 8px;
-}
-
-.mode-btn {
-  padding: 8px 20px;
-  border-radius: 8px;
-  background: var(--bg-input);
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.mode-btn:hover {
-  background: var(--border-color);
-  color: var(--text-primary);
-}
-
-.mode-btn.active {
-  background: var(--primary-color);
-  color: white;
-}
-
-/* Main Content */
+/* Main content */
 .app-main {
   flex: 1;
   display: flex;
+  flex-direction: column;
   gap: 24px;
   padding: 24px;
   max-width: 1600px;
@@ -74,69 +50,42 @@
   width: 100%;
 }
 
-.content-area {
-  flex: 1;
+.top-row {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.demo-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  align-items: stretch;
 }
 
 .text-section {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  min-width: 0;
 }
 
-/* Translation Info */
-.translation-info {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid var(--border-color);
-}
-
-.translation-info h3 {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.translation-info .input-text {
-  font-size: 18px;
-  line-height: 1.6;
-  margin-bottom: 16px;
-}
-
-.gloss-list {
+.gloss-section {
+  flex: 1;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+  min-width: 0;
 }
 
-.gloss-tag {
-  background: var(--primary-color);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
+.gloss-section > * {
+  flex: 1;
 }
 
-.confidence {
-  font-size: 14px;
-  color: var(--text-secondary);
+/* Showcase row — full-width video under the top row */
+.showcase-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
-/* Error Message */
+.showcase-row > * {
+  width: 100%;
+}
+
+/* Error banner */
 .error-message {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid var(--error-color);
@@ -144,15 +93,6 @@
   padding: 12px 16px;
   border-radius: 8px;
   font-size: 14px;
-}
-
-/* Video Area */
-.video-area {
-  width: 480px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
 /* Footer */
@@ -167,14 +107,8 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .app-main {
+  .top-row {
     flex-direction: column;
-  }
-
-  .video-area {
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
   }
 }
 
